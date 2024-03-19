@@ -36,7 +36,7 @@
 ```html
 <!-- CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css">
-
+```
 ### Как интегрировать конструктор на сайт?
 
 #### Шаг №1
