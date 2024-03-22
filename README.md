@@ -86,6 +86,15 @@
 </script>
 ```
 ---
+
+Если вам необходимо редактировать страницу, вы можете загрзуить код для редактирования с помощью метода setHTML() объекта pageGridBuilder:
+```javascript
+<script>
+    const stringHTML; // Код страницы
+    pageGridBuilder.setHTML(stringHTML);
+</script>
+```
+---
 Что-то не получилось или не работает?
 
 - просто напиши мне об этом на почту vladlen@vozhzhaev.ru

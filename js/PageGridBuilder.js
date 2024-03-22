@@ -28,6 +28,7 @@ class PageGridBuilder {
     addContainer = (container)=>{
         let count = this._containers.push(container);
         this._containers[count-1].id = "container_"+(count-1);
+        this._containers[count-1].dataset.builder = "true"
         return count-1;
     }
     addContainerContent = (containerIndex, content)=>{
@@ -38,22 +39,26 @@ class PageGridBuilder {
             container.style.border = "2px dotted #03a5fc";
             if(container.firstElementChild.classList.contains('row')){
                 container.firstElementChild.childNodes.forEach((col)=>{
-                    const button = document.createElement('button');
-                    button.classList.add('btn', 'btn-light', 'my-3', 'btn-spec-elem-ghjfkffh');
-                    button.style.display = 'block';
-                    button.style.margin  = 'auto';
-                    button.innerHTML = `<img src="icons/content.png" alt=""><br>Добавить контент`;
-                    button.onclick = ()=>{
-                        this.renderSunEditor(col, true);
-                    }
-                    if(!col.hasChildNodes(button)){
-                        col.append(button);
-                    }
+                    this.renderAddContentBtn(col);
 
                 })
             }
             page.append(container);
         })
+    }
+
+    renderAddContentBtn = (col)=>{
+        const button = document.createElement('button');
+        button.classList.add('btn', 'btn-light', 'my-3', 'btn-spec-elem-page-grid-builder');
+        button.style.display = 'block';
+        button.style.margin  = 'auto';
+        button.innerHTML = `<img src="icons/content.png" alt=""><br>Добавить контент`;
+        button.onclick = ()=>{
+            this.renderSunEditor(col, true);
+        }
+        if(!col.hasChildNodes(button)){
+            col.append(button);
+        }
     }
 
     renderSunEditor = (col, start)=>{
@@ -100,25 +105,6 @@ class PageGridBuilder {
             })
         }
         col.append(button);
-    }
-
-    getHTML = ()=>{
-        let result = "";
-        this._containers.forEach((container)=>{
-            container.style.border = "";
-            if(container.firstElementChild.classList.contains('row')){
-                Array.from(container.firstElementChild.children).forEach(col=>{
-                    if(col.firstElementChild.classList.contains('btn-spec-elem-ghjfkffh')){
-                        col.innerHTML = "<span data-content='elem-ghjfkffh'></span>";
-                    }else{
-                        col.classList.remove('edit-element');
-                        col.style.border = "";
-                    }
-                })
-            }
-            result += container.outerHTML;
-        });
-        return result;
     }
 
     static renderContainer(contentType){
@@ -311,5 +297,53 @@ class PageGridBuilder {
         modalDialog.append(modalContent);
         modal.append(modalDialog);
         return modal;
+    }
+
+    setHTML(htmlString){
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(htmlString, "text/html");
+        const documentBody = doc.body;
+        this._containers = [];
+        PageGridBuilder.page.innerHTML = "";
+        documentBody.childNodes.forEach(container =>{
+            if(container.dataset.builder){
+                const row = container.firstChild;
+                if(row.classList.contains('row')){
+                    row.childNodes.forEach(col=>{
+                        if(col.firstChild.dataset.content === "elem-page-grid-builder"){
+                            col.innerHTML = "";
+                            this.renderAddContentBtn(col);
+                        }else{
+                            col.classList.add("edit-element");
+                            col.childNodes.forEach(elem=>{
+                                elem.onclick = ()=>{this.renderSunEditor(col, false)};
+                            })
+                        }
+                    });
+                }
+            }
+            this._containers.push(container);
+        });
+        this._containers.forEach(container=>{
+            PageGridBuilder.page.append(container);
+        })
+    }
+    getHTML = ()=>{
+        let result = "";
+        this._containers.forEach((container)=>{
+            container.style.border = "";
+            if(container.firstElementChild.classList.contains('row')){
+                Array.from(container.firstElementChild.children).forEach(col=>{
+                    if(col.firstElementChild.classList.contains('btn-spec-elem-page-grid-builder')){
+                        col.innerHTML = "<span data-content='elem-page-grid-builder'></span>";
+                    }else{
+                        col.classList.remove('edit-element');
+                        col.style.border = "";
+                    }
+                })
+            }
+            result += container.outerHTML;
+        });
+        return result;
     }
 }
